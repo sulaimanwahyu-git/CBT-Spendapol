@@ -8,6 +8,9 @@ import LoginPage from './components/LoginPage';
 import DataConfirmationPage from './components/DataConfirmationPage';
 import TestStartPage from './components/TestStartPage';
 import TestPage from './components/TestPage';
+import AdminLoginPage from './components/AdminLoginPage';
+import AdminDashboardPage from './components/AdminDashboardPage';
+import StudentManagementPage from './components/StudentManagementPage';
 import { Step, UserData } from './types';
 import { supabase } from './lib/supabase';
 
@@ -18,14 +21,14 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        setUserData({ username: session.user.email || '', name: session.user.email || '', subject: '' });
+        setUserData({ username: session.user.email || '', name: session.user.email || '', subject: '', examId: '' });
         setStep('data-confirmation');
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        setUserData({ username: session.user.email || '', name: session.user.email || '', subject: '' });
+        setUserData({ username: session.user.email || '', name: session.user.email || '', subject: '', examId: '' });
         setStep('data-confirmation');
       } else {
         setUserData(null);
@@ -41,12 +44,20 @@ export default function App() {
       <header className="bg-blue-800 text-white p-4 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold">PUSMENDIK - APLIKASI ANBK</h1>
-          {userData && (
-            <div className="flex items-center gap-4">
-              <span className="text-sm">{userData.username} - {userData.subject}</span>
-              <button onClick={() => supabase.auth.signOut()} className="text-xs bg-red-600 px-2 py-1 rounded">Logout</button>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {userData && (
+              <>
+                <span className="text-sm">{userData.username} - {userData.subject}</span>
+                <button onClick={() => supabase.auth.signOut()} className="text-xs bg-red-600 px-2 py-1 rounded">Logout</button>
+              </>
+            )}
+            {step !== 'admin-dashboard' && step !== 'admin-login' && !userData && (
+              <button onClick={() => setStep('admin-login')} className="text-xs bg-yellow-600 px-2 py-1 rounded">Admin</button>
+            )}
+            {step === 'admin-dashboard' && (
+              <button onClick={() => setStep('login')} className="text-xs bg-red-600 px-2 py-1 rounded">Logout Admin</button>
+            )}
+          </div>
         </div>
       </header>
       
@@ -55,6 +66,9 @@ export default function App() {
         {step === 'data-confirmation' && userData && <DataConfirmationPage username={userData.username} onSubmit={(d) => { setUserData(d); setStep('test-start'); }} />}
         {step === 'test-start' && userData && <TestStartPage userData={userData} onStart={() => setStep('test-active')} />}
         {step === 'test-active' && userData && <TestPage userData={userData} />}
+        {step === 'admin-login' && <AdminLoginPage onLogin={() => setStep('admin-dashboard')} />}
+        {step === 'admin-dashboard' && <AdminDashboardPage onNavigate={(s) => setStep(s)} />}
+        {step === 'student-management' && <StudentManagementPage onBack={() => setStep('admin-dashboard')} />}
       </main>
     </div>
   );
