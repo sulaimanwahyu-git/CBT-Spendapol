@@ -1,14 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { UserData } from '../types';
+import { getExams } from '../services/supabaseService';
 
 interface Props {
   username: string;
   onSubmit: (data: UserData) => void;
 }
 
+interface Exam {
+  id: string;
+  title: string;
+  subject: string;
+}
+
 export default function DataConfirmationPage({ username, onSubmit }: Props) {
-  const [subject, setSubject] = useState('Matematika');
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [token, setToken] = useState('');
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      const { data } = await getExams('Matematika'); // Default to Matematika for now
+      if (data) setExams(data);
+    };
+    fetchExams();
+  }, []);
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl mx-auto">
@@ -20,12 +36,17 @@ export default function DataConfirmationPage({ username, onSubmit }: Props) {
         <div>
           <label className="block text-sm text-gray-500">Mata Ujian</label>
           <select 
-            value={subject} 
-            onChange={(e) => setSubject(e.target.value)}
+            value={selectedExam?.id || ''} 
+            onChange={(e) => {
+              const exam = exams.find(ex => ex.id === e.target.value);
+              setSelectedExam(exam || null);
+            }}
             className="w-full p-2 border border-gray-300 rounded-lg"
           >
-            <option>Matematika</option>
-            <option>Bahasa Indonesia</option>
+            <option value="">Pilih Ujian</option>
+            {exams.map(exam => (
+              <option key={exam.id} value={exam.id}>{exam.title}</option>
+            ))}
           </select>
         </div>
 
@@ -41,8 +62,9 @@ export default function DataConfirmationPage({ username, onSubmit }: Props) {
         </div>
 
         <button 
-          onClick={() => onSubmit({ username, name: username, subject })}
-          className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+          onClick={() => selectedExam && onSubmit({ username, name: username, subject: selectedExam.subject, examId: selectedExam.id })}
+          disabled={!selectedExam}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
         >
           Submit
         </button>

@@ -4,4 +4,5 @@ export interface UserData {
   username: string;
   name: string;
   subject: string;
+  examId: string;
 }

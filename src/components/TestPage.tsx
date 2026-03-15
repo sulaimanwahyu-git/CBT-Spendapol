@@ -1,10 +1,28 @@
+import { useState, useEffect } from 'react';
 import { UserData } from '../types';
+import { getQuestions } from '../services/supabaseService';
 
 interface Props {
   userData: UserData;
 }
 
+interface Question {
+  id: string;
+  question_text: string;
+  options: { id: string; text: string }[];
+}
+
 export default function TestPage({ userData }: Props) {
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      const { data } = await getQuestions(userData.examId);
+      if (data) setQuestions(data);
+    };
+    fetchQuestions();
+  }, [userData.examId]);
+
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -15,18 +33,20 @@ export default function TestPage({ userData }: Props) {
         </div>
       </div>
 
-      <div className="border-t pt-6">
-        <p className="mb-6">Ani membeli 2 pulpen dan 2 pensil di sebuah toko alat tulis. Harga satuan pulpen adalah Rp12.000,00 dan harga satuan pensil adalah Rp8.000,00. Kebetulan, toko tersebut sedang memberikan promo "Hemat Berempat" dengan ketentuan sebagai berikut: "Setiap pembelian 4 barang (boleh campur) akan mendapat potongan harga sebesar harga 1 barang termurah yang dibeli".</p>
-        
-        <div className="space-y-3">
-          {['Rp32.000,00', 'Rp36.000,00', 'Rp40.000,00', 'Rp44.000,00'].map((option, i) => (
-            <label key={i} className="flex items-center gap-3 cursor-pointer">
-              <input type="radio" name="answer" className="w-4 h-4" />
-              {option}
-            </label>
-          ))}
+      {questions.length > 0 && (
+        <div className="border-t pt-6">
+          <p className="mb-6">{questions[0].question_text}</p>
+          
+          <div className="space-y-3">
+            {questions[0].options.map((option) => (
+              <label key={option.id} className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="answer" className="w-4 h-4" />
+                {option.text}
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="flex justify-between mt-8 pt-6 border-t">
         <button className="bg-red-600 text-white px-6 py-2 rounded-lg">Soal sebelumnya</button>
