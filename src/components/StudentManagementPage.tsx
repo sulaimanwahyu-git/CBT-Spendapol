@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 
 export default function StudentManagementPage({ onBack }: { onBack: () => void }) {
   const [students, setStudents] = useState<any[]>([]);
-  const [newStudent, setNewStudent] = useState({ name: '', class: '', username: '', password: '' });
+  const [newStudent, setNewStudent] = useState({ name: '', kelas: '', username: '', password: '' });
 
   useEffect(() => {
     fetchStudents();
@@ -17,10 +17,19 @@ export default function StudentManagementPage({ onBack }: { onBack: () => void }
   };
 
   const addStudent = async () => {
-    const { error } = await supabase.from('students').insert([newStudent]);
-    if (error) console.error('Error adding student:', error);
+    console.log('Adding student:', newStudent);
+    const { error } = await supabase.from('students').insert([{
+      name: newStudent.name,
+      class: newStudent.kelas,
+      username: newStudent.username,
+      password: newStudent.password
+    }]);
+    if (error) {
+      console.error('Error adding student:', error);
+      alert('Gagal menambah murid: ' + error.message);
+    }
     else {
-      setNewStudent({ name: '', class: '', username: '', password: '' });
+      setNewStudent({ name: '', kelas: '', username: '', password: '' });
       fetchStudents();
     }
   };
@@ -65,7 +74,7 @@ export default function StudentManagementPage({ onBack }: { onBack: () => void }
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex gap-4">
           <input placeholder="Nama" value={newStudent.name} onChange={(e) => setNewStudent({...newStudent, name: e.target.value})} className="p-2 border rounded" />
-          <input placeholder="Kelas" value={newStudent.class} onChange={(e) => setNewStudent({...newStudent, class: e.target.value})} className="p-2 border rounded" />
+          <input placeholder="Kelas" value={newStudent.kelas} onChange={(e) => setNewStudent({...newStudent, kelas: e.target.value})} className="p-2 border rounded" />
           <input placeholder="Username" value={newStudent.username} onChange={(e) => setNewStudent({...newStudent, username: e.target.value})} className="p-2 border rounded" />
           <input placeholder="Password" type="password" value={newStudent.password} onChange={(e) => setNewStudent({...newStudent, password: e.target.value})} className="p-2 border rounded" />
           <button onClick={addStudent} className="bg-green-600 text-white px-4 py-2 rounded">Tambah Murid</button>
@@ -90,7 +99,7 @@ export default function StudentManagementPage({ onBack }: { onBack: () => void }
           {students.map((student) => (
             <tr key={student.id}>
               <td className="p-2 border">{student.name}</td>
-              <td className="p-2 border">{student.class}</td>
+              <td className="p-2 border">{student.kelas}</td>
               <td className="p-2 border">{student.username}</td>
               <td className="p-2 border">{student.password}</td>
               <td className="p-2 border">
