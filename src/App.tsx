@@ -65,7 +65,7 @@ export default function App() {
       </header>
       
       <main className="flex-grow p-6">
-        {step === 'login' && <LoginPage onLogin={() => setStep('data-confirmation')} />}
+        {step === 'login' && <LoginPage onLogin={(name) => { setUserData({ username: name, name: name, subject: '', examId: '' }); setStep('data-confirmation'); }} />}
         {step === 'data-confirmation' && userData && <DataConfirmationPage username={userData.username} onSubmit={(d) => { setUserData(d); setStep('test-start'); }} />}
         {step === 'test-start' && userData && <TestStartPage userData={userData} onStart={() => setStep('test-active')} />}
         {step === 'test-active' && userData && <TestPage userData={userData} />}
