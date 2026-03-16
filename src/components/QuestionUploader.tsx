@@ -50,6 +50,7 @@ export default function QuestionUploader({ examId, onUploadSuccess }: Props) {
 
       for (let i = 0; i < questions.length; i += BATCH_SIZE) {
         const batch = questions.slice(i, i + BATCH_SIZE);
+        console.log("Uploading batch:", batch);
         const { error } = await supabase.from('questions').insert(batch);
         
         if (error) {
