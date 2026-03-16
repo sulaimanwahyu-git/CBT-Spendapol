@@ -13,10 +13,17 @@ export default function QuestionManagementPage({ onBack }: { onBack: () => void 
   }, []);
 
   const fetchQuestions = async () => {
-    const { data, error } = await supabase.from('questions').select('*, exams(title)');
-    if (error) console.error('Error fetching questions:', error);
-    else {
-      console.log("Questions fetched:", data);
+    console.log("Fetching questions...");
+    const { data, error } = await supabase.from('questions').select('*, exams(title), option_a, option_b, option_c, option_d');
+    if (error) {
+      console.error('Error fetching questions:', error);
+    } else {
+      console.log("Questions fetched from Supabase:", data);
+      if (data && data.length > 0) {
+        console.log("First question object:", data[0]);
+      } else {
+        console.log("No questions found in database.");
+      }
       setQuestions(data || []);
     }
   };
@@ -77,6 +84,7 @@ export default function QuestionManagementPage({ onBack }: { onBack: () => void 
             <th className="p-2 border">Ujian</th>
             <th className="p-2 border">Soal</th>
             <th className="p-2 border">Tipe</th>
+            <th className="p-2 border">Opsi</th>
             <th className="p-2 border">Kunci</th>
             <th className="p-2 border">Aksi</th>
           </tr>
@@ -87,6 +95,12 @@ export default function QuestionManagementPage({ onBack }: { onBack: () => void 
               <td className="p-2 border">{q.exams?.title}</td>
               <td className="p-2 border">{q.question}</td>
               <td className="p-2 border">{q.type}</td>
+              <td className="p-2 border">
+                A: {q.option_a}<br/>
+                B: {q.option_b}<br/>
+                C: {q.option_c}<br/>
+                D: {q.option_d}
+              </td>
               <td className="p-2 border">{q.correct_answer}</td>
               <td className="p-2 border">
                 <button onClick={() => deleteQuestion(q.id)} className="text-red-600">Hapus</button>

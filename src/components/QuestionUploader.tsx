@@ -29,7 +29,16 @@ export default function QuestionUploader({ examId, onUploadSuccess }: Props) {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     console.log("File:", file);
-    if (!file || !examId) return;
+    console.log("Exam ID:", examId);
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+    if (!examId) {
+      console.log("No exam selected");
+      alert("Harap pilih ujian terlebih dahulu!");
+      return;
+    }
 
     setLoading(true);
     const reader = new FileReader();
