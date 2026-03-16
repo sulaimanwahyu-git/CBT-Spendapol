@@ -45,6 +45,7 @@ export default function QuestionUploader({ examId, onUploadSuccess }: Props) {
         
         if (error) {
           console.error(`Error uploading batch ${i / BATCH_SIZE + 1}:`, error);
+          console.error("Error details:", JSON.stringify(error, null, 2));
           errorCount += batch.length;
         } else {
           successCount += batch.length;
