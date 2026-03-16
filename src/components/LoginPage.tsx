@@ -13,15 +13,17 @@ export default function LoginPage({ onLogin }: Props) {
 
   const handleLogin = async () => {
     setError('');
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: username, // Assuming username is email
-      password,
-    });
+    const { data, error } = await supabase
+      .from('students')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .single();
 
-    if (error) {
-      setError(error.message);
-    } else if (data.user) {
-      onLogin(data.user.email || username);
+    if (error || !data) {
+      setError('Username atau password salah');
+    } else {
+      onLogin(data.name);
     }
   };
 
