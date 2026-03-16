@@ -78,7 +78,10 @@ export default function QuestionUploader({ examId, onUploadSuccess }: Props) {
                 exam_id: examId,
                 question: row.question,
                 type: row.type,
-                options: parsedOptions,
+                option_a: parsedOptions[0] || '',
+                option_b: parsedOptions[1] || '',
+                option_c: parsedOptions[2] || '',
+                option_d: parsedOptions[3] || '',
                 correct_answer: row.correct_answer
               };
             });
@@ -104,7 +107,10 @@ export default function QuestionUploader({ examId, onUploadSuccess }: Props) {
             exam_id: examId,
             question: row.querySelector('.question')?.textContent,
             type: row.querySelector('.type')?.textContent,
-            options: parsedOptions,
+            option_a: parsedOptions[0] || '',
+            option_b: parsedOptions[1] || '',
+            option_c: parsedOptions[2] || '',
+            option_d: parsedOptions[3] || '',
             correct_answer: row.querySelector('.correct_answer')?.textContent
           };
         });
