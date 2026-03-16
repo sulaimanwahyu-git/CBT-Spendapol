@@ -8,6 +8,12 @@ export const getExams = async (subject: string) => {
     .eq('is_active', true);
 };
 
+export const getAllExams = async () => {
+  return await supabase
+    .from('exams')
+    .select('*');
+};
+
 export const getQuestions = async (examId: string) => {
   return await supabase
     .from('questions')

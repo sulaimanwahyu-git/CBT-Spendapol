@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { UserData } from '../types';
-import { getExams } from '../services/supabaseService';
+import { getAllExams } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 
 interface Props {
@@ -12,6 +12,10 @@ interface Exam {
   id: string;
   title: string;
   subject: string;
+  duration: number;
+  token: string;
+  start_time: string;
+  end_time: string;
 }
 
 export default function DataConfirmationPage({ username, onSubmit }: Props) {
@@ -22,9 +26,9 @@ export default function DataConfirmationPage({ username, onSubmit }: Props) {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch exams
-      const { data } = await getExams('Matematika'); // Default to Matematika for now
-      if (data) setExams(data);
+      // Fetch all exams
+      const { data } = await getAllExams();
+      if (data) setExams(data as Exam[]);
 
       // Fetch student data
       console.log('Fetching all student data to verify connection...');
@@ -75,6 +79,14 @@ export default function DataConfirmationPage({ username, onSubmit }: Props) {
               <option key={exam.id} value={exam.id}>{exam.title}</option>
             ))}
           </select>
+          {selectedExam && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm space-y-1">
+              <p><span className="font-semibold">Mata Pelajaran:</span> {selectedExam.subject}</p>
+              <p><span className="font-semibold">Durasi:</span> {selectedExam.duration} menit</p>
+              <p><span className="font-semibold">Waktu Mulai:</span> {new Date(selectedExam.start_time).toLocaleString()}</p>
+              <p><span className="font-semibold">Waktu Berakhir:</span> {new Date(selectedExam.end_time).toLocaleString()}</p>
+            </div>
+          )}
         </div>
 
         <div>

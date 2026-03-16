@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import QuestionUploader from './QuestionUploader';
 
 export default function QuestionManagementPage({ onBack }: { onBack: () => void }) {
   const [questions, setQuestions] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
-  const [newQuestion, setNewQuestion] = useState({ exam_id: '', question: '', option_a: '', option_b: '', option_c: '', option_d: '', correct_answer: 'a' });
+  const [newQuestion, setNewQuestion] = useState({ exam_id: '', question: '', type: 'multiple_choice', options: '["A", "B", "C", "D"]', correct_answer: 'a' });
 
   useEffect(() => {
     fetchQuestions();
@@ -14,7 +15,10 @@ export default function QuestionManagementPage({ onBack }: { onBack: () => void 
   const fetchQuestions = async () => {
     const { data, error } = await supabase.from('questions').select('*, exams(title)');
     if (error) console.error('Error fetching questions:', error);
-    else setQuestions(data || []);
+    else {
+      console.log("Questions fetched:", data);
+      setQuestions(data || []);
+    }
   };
 
   const fetchExams = async () => {
@@ -24,12 +28,15 @@ export default function QuestionManagementPage({ onBack }: { onBack: () => void 
   };
 
   const addQuestion = async () => {
-    const { error } = await supabase.from('questions').insert([newQuestion]);
+    const { error } = await supabase.from('questions').insert([{
+      ...newQuestion,
+      options: JSON.parse(newQuestion.options)
+    }]);
     if (error) {
       console.error('Error adding question:', error);
       alert('Gagal menambah soal: ' + error.message);
     } else {
-      setNewQuestion({ exam_id: '', question: '', option_a: '', option_b: '', option_c: '', option_d: '', correct_answer: 'a' });
+      setNewQuestion({ exam_id: '', question: '', type: 'multiple_choice', options: '["A", "B", "C", "D"]', correct_answer: 'a' });
       fetchQuestions();
     }
   };
@@ -51,24 +58,25 @@ export default function QuestionManagementPage({ onBack }: { onBack: () => void 
           {exams.map(exam => <option key={exam.id} value={exam.id}>{exam.title}</option>)}
         </select>
         <input placeholder="Soal" value={newQuestion.question} onChange={(e) => setNewQuestion({...newQuestion, question: e.target.value})} className="p-2 border rounded" />
-        <input placeholder="Opsi A" value={newQuestion.option_a} onChange={(e) => setNewQuestion({...newQuestion, option_a: e.target.value})} className="p-2 border rounded" />
-        <input placeholder="Opsi B" value={newQuestion.option_b} onChange={(e) => setNewQuestion({...newQuestion, option_b: e.target.value})} className="p-2 border rounded" />
-        <input placeholder="Opsi C" value={newQuestion.option_c} onChange={(e) => setNewQuestion({...newQuestion, option_c: e.target.value})} className="p-2 border rounded" />
-        <input placeholder="Opsi D" value={newQuestion.option_d} onChange={(e) => setNewQuestion({...newQuestion, option_d: e.target.value})} className="p-2 border rounded" />
-        <select value={newQuestion.correct_answer} onChange={(e) => setNewQuestion({...newQuestion, correct_answer: e.target.value})} className="p-2 border rounded">
-          <option value="a">A</option>
-          <option value="b">B</option>
-          <option value="c">C</option>
-          <option value="d">D</option>
+        <select value={newQuestion.type} onChange={(e) => setNewQuestion({...newQuestion, type: e.target.value})} className="p-2 border rounded">
+          <option value="multiple_choice">Pilihan Ganda</option>
+          <option value="mcma">Pilihan Ganda Kompleks (MCMA)</option>
+          <option value="true_false">Benar/Salah</option>
+          <option value="essay">Essay</option>
         </select>
+        <input placeholder="Opsi (JSON Array)" value={newQuestion.options} onChange={(e) => setNewQuestion({...newQuestion, options: e.target.value})} className="p-2 border rounded" />
+        <input placeholder="Kunci Jawaban" value={newQuestion.correct_answer} onChange={(e) => setNewQuestion({...newQuestion, correct_answer: e.target.value})} className="p-2 border rounded" />
         <button onClick={addQuestion} className="bg-green-600 text-white px-4 py-2 rounded">Tambah Soal</button>
       </div>
 
-      <table className="w-full border-collapse">
+      <QuestionUploader examId={newQuestion.exam_id} onUploadSuccess={fetchQuestions} />
+
+      <table className="w-full border-collapse mt-6">
         <thead>
           <tr className="bg-gray-100">
             <th className="p-2 border">Ujian</th>
             <th className="p-2 border">Soal</th>
+            <th className="p-2 border">Tipe</th>
             <th className="p-2 border">Kunci</th>
             <th className="p-2 border">Aksi</th>
           </tr>
@@ -78,7 +86,8 @@ export default function QuestionManagementPage({ onBack }: { onBack: () => void 
             <tr key={q.id}>
               <td className="p-2 border">{q.exams?.title}</td>
               <td className="p-2 border">{q.question}</td>
-              <td className="p-2 border">{q.correct_answer.toUpperCase()}</td>
+              <td className="p-2 border">{q.type}</td>
+              <td className="p-2 border">{q.correct_answer}</td>
               <td className="p-2 border">
                 <button onClick={() => deleteQuestion(q.id)} className="text-red-600">Hapus</button>
               </td>
